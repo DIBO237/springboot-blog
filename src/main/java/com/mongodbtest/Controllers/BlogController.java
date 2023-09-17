@@ -13,8 +13,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.mongodbtest.Repository.BlogRepository;
+
+import com.mongodbtest.Repository.AuthorRepo;
 import com.mongodbtest.Models.Blog;
+import com.mongodbtest.Models.Author;
 import com.mongodbtest.Utils.Responses;
+import java.util.Optional;
+import org.bson.types.ObjectId;
 
 class successBlog {
 	public String id;
@@ -33,6 +38,7 @@ class BlogController {
 
 	@Autowired
 	private BlogRepository blogRepository;
+	private AuthorRepo authorRepo;
 
 	// POST BLOG FROM HERE
 
@@ -74,46 +80,50 @@ class BlogController {
 
 			return ResponseEntity.badRequest().body(failureResponse);
 		}
-		
-		
+
 		try {
-			
-			
-			Blog postHandles = new Blog(title,subject,content,author);
-			
+
+			String author_id = "6506ec5982015f549d479462";
+
+			Blog postHandles = new Blog(title, subject, content, author);
+
 			blogRepository.save(postHandles);
-			
-			
+
+			Optional<Author> authorDataOptional = authorRepo.findById(author_id);
+			Author authData = authorDataOptional.get();
+
+			// Assuming postHandles.id is a String
+			String postIdString = postHandles.id;
+			ObjectId postId = new ObjectId(postIdString);
+
+			authData.published_post.add(postId);
+
+			authorRepo.save(authData);
+
 			successBlog successMSG = new successBlog(postHandles.id, "Blog instered successfully");
 			Responses successResponse = new Responses(200, "Successfully submitted", successMSG, true);
 
 			return ResponseEntity.ok(successResponse);
-			
-		}catch (Exception e) {
-			
+
+		} catch (Exception e) {
+
 			Responses failureResponse = new Responses(400, "author is emtpry", null, false);
 
 			return ResponseEntity.internalServerError().body(failureResponse);
 		}
-		
-		
-		
 
-		
 	}
-	
-	
+
 	@GetMapping("/getpost")
 	@ResponseBody
-	public ResponseEntity<Responses<List>> getPost() { 
-		
-		List <Blog> getallpost = blogRepository.findAll();
-		
+	public ResponseEntity<Responses<List>> getPost() {
+
+		List<Blog> getallpost = blogRepository.findAll();
+
 		Responses successResponse = new Responses(200, "Successfully submitted", getallpost, true);
 
 		return ResponseEntity.ok(successResponse);
-		
+
 	}
-	
 
 }

@@ -30,6 +30,10 @@ public class Blog {
 		return String.format("Customer[id=%s, firstName='%s', lastName='%s']", id, title, subject, content, author,created_At);
 	}
 
+
+
+
+
 	public String getTitle() {
 		return title;
 	}
